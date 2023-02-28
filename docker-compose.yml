@@ -1,0 +1,48 @@
+# Версия docker-compose
+version: "3.9"
+
+# Сервисы php и nginx (контейнеры, которые будут у нас подниматься)
+services:
+  # Поднятие контейнера-сервиса php собираемого из докер-файла, который лежит в корне, монтируем-биндим (пробрасываем) папку /www в контейнер в каталог /var/www.
+  # Контейнер будет автоматически перезапускаться в случае падения. 
+  php:
+    build: .
+    container_name: php
+    restart: unless-stopped
+    volumes:
+      - ./www:/var/www
+    networks:
+    - myNetworPractice
+
+  # Поднятие контейнера-сервиса NGINX, взятый готовым из риджестри, пробрасываем порт 80 в контейнер, запускается после зависимого от него контейнера php,
+  # монтируем-биндим (пробрасываем) папки с конфигами в контейнер в соотвестствующие каталоги. Контейнер будет автоматически перезапускаться в случае падения.
+  # Тестирование healthcheck для php-сервиса, и проверка содержимого сайта на наличие строки «works». В конвейере при помощи grep ищем в содержимом страницы 
+  # index.php слово "works", с периодичностью 5 сек., перерывом в 10 сек. и 20-ю попытками.
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - 80:80
+    depends_on:
+      - php
+    volumes:
+      - ./nginx:/etc/nginx/conf.d      
+      - ./www:/var/www
+      - ./logs:/var/log/nginx
+    links:
+      - php
+    networks:
+    - myNetworpPactice
+    healthcheck:
+      test: curl -sS http://127.0.0.1 | grep -c works > /dev/null
+      interval: 5s
+      timeout: 10s
+      retries: 20
+
+  # Создаём новую сеть типа bridge с названием myNetworPractice, в которой будут находиться оба контейнера видеть и "разрезолвливать" друг друга по именам  
+networks:
+  myNetworPractice:
+    driver: bridge
+
+    
