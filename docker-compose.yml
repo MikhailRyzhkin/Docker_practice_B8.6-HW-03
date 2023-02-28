@@ -12,7 +12,7 @@ services:
     volumes:
       - ./www:/var/www
     networks:
-    - myNetworPractice
+    - myNetworkPractice
 
   # Поднятие контейнера-сервиса NGINX, взятый готовым из риджестри, пробрасываем порт 80 в контейнер, запускается после зависимого от него контейнера php,
   # монтируем-биндим (пробрасываем) папки с конфигами в контейнер в соотвестствующие каталоги. Контейнер будет автоматически перезапускаться в случае падения.
@@ -33,7 +33,7 @@ services:
     links:
       - php
     networks:
-    - myNetworpPactice
+    - myNetworkPractice
     healthcheck:
       test: curl -sS http://127.0.0.1 | grep -c works > /dev/null
       interval: 5s
@@ -42,7 +42,7 @@ services:
 
   # Создаём новую сеть типа bridge с названием myNetworPractice, в которой будут находиться оба контейнера видеть и "разрезолвливать" друг друга по именам  
 networks:
-  myNetworPractice:
+  myNetworkPractice:
     driver: bridge
 
     
